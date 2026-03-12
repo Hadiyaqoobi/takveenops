@@ -42,14 +42,13 @@ export default function TaskCard({ task, onClick }) {
       ref={setNodeRef}
       style={{ ...style, opacity: isDragging ? 0.3 : 1 }}
       className={`card ${isBlocked ? 'card-blocked' : ''} ${isDragging ? 'card-dragging' : ''}`}
+      {...listeners}
+      {...attributes}
     >
-      {/* Drag handle = entire left bar area */}
+      {/* Colored left bar */}
       <div
         className="card-drag-handle"
-        {...listeners}
-        {...attributes}
         style={{ background: typeColor }}
-        title="Drag to move"
       />
 
       {/* Clickable card body */}
