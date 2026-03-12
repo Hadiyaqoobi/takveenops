@@ -1,0 +1,70 @@
+# TakvenOps Configuration
+# AI-native project management for the ROE Platform
+
+project:
+  name: ROE Platform
+  repo: roe-scaffold
+  version: 0.1.0
+
+# ── Team ──────────────────────────────────────────────────
+team:
+  - id: you
+    name: Hasibullah Yaqoobi
+    role: founder
+    type: human
+  - id: antigravity
+    name: Antigravity AI
+    role: engineer
+    type: ai-agent
+    capabilities: [code, test, review, deploy, scan]
+  - id: claude-code
+    name: Claude Code
+    role: engineer
+    type: ai-agent
+    capabilities: [code, test, review]
+
+# ── Task Settings ─────────────────────────────────────────
+task:
+  id_prefix: ROE
+  next_id: 6        # auto-incremented
+  types: [feature, bug, tech-debt, research, ops]
+  priorities: [P0, P1, P2, P3]
+  statuses: [backlog, assigned, in-progress, review, done, blocked]
+
+# ── Sprint Settings ───────────────────────────────────────
+sprint:
+  current: 1
+  duration_days: 14
+  start_date: "2026-03-11"
+  goal: "Launch production platform, collect first 50 real profiles"
+
+# ── Codebase Scan Settings ────────────────────────────────
+scan:
+  paths:
+    - api/
+    - frontend/src/
+    - scripts/
+  ignore:
+    - api/ml/models/
+    - api/data/
+    - node_modules/
+    - __pycache__/
+  rules:
+    todo_comments: true         # detect TODO/FIXME/HACK
+    missing_tests: true         # detect untested routes/services
+    high_complexity: true       # functions with complexity > 10
+    error_handling: true        # API routes without try/except
+    outdated_deps: false        # skip for now
+
+# ── Notifications ─────────────────────────────────────────
+notifications:
+  standup_time: "09:00"         # EST
+  slack_webhook: ""             # fill in when ready
+  discord_webhook: ""           # fill in when ready
+
+# ── AI Agent Rules ────────────────────────────────────────
+ai_rules:
+  max_concurrent_tasks: 2
+  require_human_review: true    # AI can't close tasks without human approval
+  auto_assign_threshold: P2     # auto-assign P2 and below to AI
+  verification_retries: 3       # retry verification 3x before flagging

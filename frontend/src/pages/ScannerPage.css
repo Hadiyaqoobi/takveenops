@@ -1,0 +1,105 @@
+/* Scanner page — Azure style */
+.scanner-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.scanner-input {
+  flex: 1;
+  padding: 5px 10px;
+  font-size: 13px;
+}
+
+.scanner-summary {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.scanner-group {
+  margin-bottom: 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.scanner-group h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-heading);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--bg-page);
+  border-bottom: 1px solid var(--border);
+}
+
+.scanner-issues {
+  display: flex;
+  flex-direction: column;
+}
+
+.scanner-issue {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 12px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border-light);
+}
+.scanner-issue:last-child { border-bottom: none; }
+.scanner-issue:hover {
+  background: var(--bg-page);
+}
+
+.issue-file {
+  color: var(--text-muted);
+  font-size: 12px;
+  min-width: 220px;
+  font-family: 'Cascadia Code', Consolas, monospace;
+}
+
+.issue-text {
+  flex: 1;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-sm {
+  padding: 2px 6px;
+  font-size: 11px;
+  height: 22px;
+}
+
+.scanner-more {
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 6px 12px;
+}
+
+.scanner-history {
+  margin-top: 24px;
+}
+.scanner-history h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-heading);
+}
+
+.history-row {
+  display: flex;
+  gap: 16px;
+  padding: 6px 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-light);
+}
+.history-path {
+  color: var(--text-muted);
+  font-size: 12px;
+}

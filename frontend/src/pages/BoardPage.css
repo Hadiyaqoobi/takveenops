@@ -1,0 +1,83 @@
+/* Azure DevOps Board Layout */
+.board-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.board-columns {
+  flex: 1;
+  display: flex;
+  overflow-x: auto;
+  padding: 0;
+  gap: 0;
+}
+
+/* Each column */
+.board-col {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  background: var(--bg-column);
+  transition: background 0.15s ease;
+}
+.board-col:last-child {
+  border-right: none;
+}
+.board-col.board-col-over {
+  background: var(--accent-light);
+}
+
+/* Column header */
+.board-col-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--border);
+  background: var(--bg-surface);
+}
+
+.board-col-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.board-col-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* Card list */
+.board-col-body {
+  flex: 1;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  min-height: 80px;
+}
+
+.board-col-empty {
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+  padding: 20px 8px;
+  border: 2px dashed var(--border);
+  border-radius: 3px;
+  margin: 4px;
+}
+
+/* Drag overlay card */
+.card.card-overlay {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--accent);
+  transform: rotate(2deg);
+}
