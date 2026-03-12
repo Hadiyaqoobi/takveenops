@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Zap } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { wakeServer } from '../api';
 import './LoginPage.css';
 
 export default function LoginPage() {
@@ -9,6 +10,12 @@ export default function LoginPage() {
   const [form, setForm] = useState({ username: '', password: '', display_name: '', email: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [serverReady, setServerReady] = useState(false);
+
+  // Wake up the Render server as soon as the login page loads
+  useEffect(() => {
+    wakeServer().then(() => setServerReady(true));
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,6 +45,12 @@ export default function LoginPage() {
         <p className="login-subtitle">
           {isRegister ? 'Join your team on TakvenOps' : 'Welcome back to TakvenOps'}
         </p>
+
+        {!serverReady && (
+          <div className="login-waking">
+            Waking up server... This may take up to 60 seconds on first visit.
+          </div>
+        )}
 
         {error && <div className="login-error">{error}</div>}
 
@@ -87,7 +100,7 @@ export default function LoginPage() {
           )}
 
           <button type="submit" className="btn btn-primary login-btn" disabled={loading}>
-            {loading ? 'Please wait...' : isRegister ? 'Create Account' : 'Sign In'}
+            {loading ? 'Connecting to server...' : isRegister ? 'Create Account' : 'Sign In'}
           </button>
         </form>
 

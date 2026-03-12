@@ -7,9 +7,19 @@ function getAuthHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-async function request(path, options = {}) {
+// Wake up the server — call this early so it starts booting
+let _wakePromise = null;
+export function wakeServer() {
+  if (_wakePromise) return _wakePromise;
+  _wakePromise = fetch(`${API_BASE}/health`, { method: 'GET' })
+    .catch(() => {})
+    .finally(() => { setTimeout(() => { _wakePromise = null; }, 30000); });
+  return _wakePromise;
+}
+
+async function singleRequest(path, options = {}) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000);
+  const timeout = setTimeout(() => controller.abort(), 90000);
   try {
     const res = await fetch(`${API_BASE}${path}`, {
       headers: { 'Content-Type': 'application/json', ...getAuthHeaders(), ...options.headers },
@@ -24,13 +34,30 @@ async function request(path, options = {}) {
     return res.json();
   } catch (e) {
     clearTimeout(timeout);
-    if (e.name === 'AbortError') {
-      throw new Error('Server is waking up, please try again in a few seconds');
-    }
-    if (e.message === 'Failed to fetch') {
-      throw new Error('Cannot reach server — it may be starting up. Please wait 30s and try again.');
-    }
     throw e;
+  }
+}
+
+async function request(path, options = {}) {
+  const maxRetries = 3;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await singleRequest(path, options);
+    } catch (e) {
+      const isNetworkError = e.name === 'AbortError' || e.message === 'Failed to fetch';
+      if (isNetworkError && attempt < maxRetries) {
+        // Wait before retry — server is likely cold-starting
+        await new Promise((r) => setTimeout(r, attempt * 5000));
+        continue;
+      }
+      if (e.name === 'AbortError') {
+        throw new Error('Server is still starting up. Please wait a moment and try again.');
+      }
+      if (e.message === 'Failed to fetch') {
+        throw new Error('Cannot reach server — it may be starting up. Please wait a moment and try again.');
+      }
+      throw e;
+    }
   }
 }
 
