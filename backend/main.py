@@ -66,7 +66,28 @@ def startup():
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "app": "TakvenOps"}
+    from .services.email_service import SMTP_HOST, SMTP_USER, SMTP_PASSWORD, is_email_configured
+    return {
+        "status": "ok",
+        "app": "TakvenOps",
+        "smtp_configured": is_email_configured(),
+        "smtp_host": SMTP_HOST or "(not set)",
+        "smtp_user": SMTP_USER[:3] + "***" if SMTP_USER else "(not set)",
+    }
+
+
+@app.post("/api/test-email")
+def test_email():
+    """Send a test email to verify SMTP config."""
+    from .services.email_service import send_email, _wrap_html, is_email_configured, SMTP_HOST, SMTP_USER
+    if not is_email_configured():
+        return {"ok": False, "error": f"SMTP not configured. Host={SMTP_HOST or 'empty'}, User={SMTP_USER or 'empty'}"}
+    html = _wrap_html("<h3>Test Email</h3><p>If you see this, TakvenOps email is working!</p>")
+    try:
+        result = send_email(SMTP_USER, "TakvenOps Test Email", html)
+        return {"ok": result}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
 
 
 @app.post("/api/sync/pull")
