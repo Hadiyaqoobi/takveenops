@@ -2,8 +2,9 @@
 
 import os
 from pathlib import Path
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from starlette.staticfiles import StaticFiles
 
 from .database import init_db
@@ -85,6 +86,27 @@ def test_email():
     html = _wrap_html("<h3>Test Email</h3><p>If you see this, TakvenOps email is working!</p>")
     try:
         result = send_email(SMTP_USER, "TakvenOps Test Email", html)
+        return {"ok": result}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+class SendEmailRequest(BaseModel):
+    to: str
+    subject: str
+    body_html: str
+
+
+@app.post("/api/send-email")
+def send_custom_email(body: SendEmailRequest, request: Request):
+    """Send a custom email (admin only)."""
+    from .routes.auth import get_current_user
+    from .services.email_service import send_email
+    user = get_current_user(request)
+    if not user:
+        raise HTTPException(401, "Not authenticated")
+    try:
+        result = send_email(body.to, body.subject, body.body_html)
         return {"ok": result}
     except Exception as e:
         return {"ok": False, "error": str(e)}
