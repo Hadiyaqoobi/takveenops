@@ -16,7 +16,7 @@ function getInitials(name) {
   return name.slice(0, 2).toUpperCase();
 }
 
-export default function TaskCard({ task, onClick }) {
+export default function TaskCard({ task, onClick, bulkMode, selected, onSelect }) {
   const {
     attributes,
     listeners,
@@ -45,6 +45,17 @@ export default function TaskCard({ task, onClick }) {
       {...listeners}
       {...attributes}
     >
+      {/* Bulk checkbox */}
+      {bulkMode && (
+        <label className="card-checkbox" onClick={(e) => e.stopPropagation()}>
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={() => onSelect?.(task.id)}
+          />
+        </label>
+      )}
+
       {/* Colored left bar */}
       <div
         className="card-drag-handle"

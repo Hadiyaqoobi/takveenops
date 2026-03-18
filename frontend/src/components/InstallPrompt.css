@@ -1,0 +1,32 @@
+.install-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: var(--accent);
+  color: white;
+  font-size: 13px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.install-text {
+  flex: 1;
+  font-weight: 600;
+}
+
+.install-btn {
+  background: white !important;
+  color: var(--accent) !important;
+  font-size: 12px;
+  padding: 4px 14px !important;
+}
+
+.install-close {
+  color: white !important;
+  padding: 2px !important;
+}

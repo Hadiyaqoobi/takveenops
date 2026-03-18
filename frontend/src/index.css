@@ -271,6 +271,16 @@ input:focus, select:focus, textarea:focus {
   font-weight: 600;
   color: var(--text-heading);
 }
+.sidebar-project-select {
+  background: transparent;
+  border: none;
+  color: var(--text-heading);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+}
 
 .sidebar-section {
   padding: 6px 0;
@@ -501,6 +511,87 @@ input:focus, select:focus, textarea:focus {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #a19f9d;
+}
+
+/* ── Dark Mode ─────────────────────────────── */
+[data-theme="dark"] {
+  --bg-page: #1e1e1e;
+  --bg-surface: #252526;
+  --bg-sidebar: #1e1e1e;
+  --bg-sidebar-hover: #2a2d2e;
+  --bg-sidebar-active: #37373d;
+  --bg-column: #1e1e1e;
+  --bg-card: #2d2d2d;
+  --bg-card-hover: #333333;
+  --bg-blocked: #442222;
+  --bg-header: #0d1117;
+  --bg-input: #1e1e1e;
+
+  --border: #3e3e42;
+  --border-light: #2d2d30;
+  --border-focus: #0078d4;
+
+  --text-primary: #cccccc;
+  --text-heading: #e0e0e0;
+  --text-secondary: #969696;
+  --text-muted: #6a6a6a;
+  --text-link: #4fc1ff;
+  --text-on-accent: #ffffff;
+
+  --accent: #0078d4;
+  --accent-hover: #1e90ff;
+  --accent-light: #1a3a5c;
+  --accent-bg: rgba(0, 120, 212, 0.15);
+
+  --p0-color: #f85149;
+  --p1-color: #d29922;
+  --p2-color: #58a6ff;
+  --p3-color: #6a6a6a;
+
+  --status-backlog: #6a6a6a;
+  --status-progress: #58a6ff;
+  --status-review: #bc8cff;
+  --status-done: #56d364;
+  --status-blocked: #f85149;
+
+  --type-feature: #bc8cff;
+  --type-bug: #f85149;
+  --type-tech-debt: #d29922;
+  --type-research: #58a6ff;
+  --type-ops: #6a6a6a;
+
+  --tag-blue: #1a3a5c;
+  --tag-blue-text: #79c0ff;
+  --tag-green: #1a3a2a;
+  --tag-green-text: #56d364;
+  --tag-orange: #3a2a1a;
+  --tag-orange-text: #d29922;
+  --tag-purple: #2a1a3a;
+  --tag-purple-text: #bc8cff;
+  --tag-red: #3a1a1a;
+  --tag-red-text: #f85149;
+  --tag-gray: #2d2d2d;
+  --tag-gray-text: #969696;
+
+  color-scheme: dark;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #555;
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+/* ── Shortcut hints ────────────────────────────── */
+.shortcut-hint {
+  font-size: 10px;
+  padding: 0 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+  margin-left: 4px;
+  opacity: 0.7;
+  font-family: inherit;
 }
 
 /* ── Animations ─────────────────────────────── */

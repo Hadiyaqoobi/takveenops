@@ -23,6 +23,7 @@ class TaskCreate(BaseModel):
     depends_on: list[str] = []
     blocks: list[str] = []
     body_markdown: str = ""
+    project_id: str = "default"
 
 
 class TaskUpdate(BaseModel):

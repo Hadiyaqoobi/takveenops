@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Plus, ArrowUpDown } from 'lucide-react';
+import { Plus, ArrowUpDown, CheckSquare } from 'lucide-react';
 import TaskDetail from '../components/TaskDetail';
 import CreateTaskModal from '../components/CreateTaskModal';
+import BulkActionBar from '../components/BulkActionBar';
 import { getTasks } from '../api';
+import { useProject } from '../contexts/ProjectContext';
 import './ListPage.css';
 
 const priorityOrder = { P0: 0, P1: 1, P2: 2, P3: 3 };
@@ -10,16 +12,28 @@ const STATUS_LABELS = { backlog: 'New', 'in-progress': 'Active', review: 'Resolv
 const TYPE_COLORS = { feature: '#773b93', bug: '#cc293d', 'tech-debt': '#ca5010', research: '#0078d4', ops: '#8a8886' };
 
 export default function ListPage() {
+  const { currentProject } = useProject();
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
   const [sortField, setSortField] = useState('priority');
   const [sortDir, setSortDir] = useState('asc');
+  const [bulkMode, setBulkMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const loadTasks = async () => {
-    try { setTasks(await getTasks()); } catch (e) { console.error(e); }
+    try { setTasks(await getTasks({ project_id: currentProject })); } catch (e) { console.error(e); }
   };
-  useEffect(() => { loadTasks(); }, []);
+  useEffect(() => { loadTasks(); }, [currentProject]);
 
   const toggleSort = (field) => {
     if (sortField === field) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
@@ -51,6 +65,12 @@ export default function ListPage() {
           <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
             <Plus size={13} /> New Work Item
           </button>
+          <button
+            className={`btn btn-ghost ${bulkMode ? 'btn-active' : ''}`}
+            onClick={() => { setBulkMode(!bulkMode); setSelectedIds(new Set()); }}
+          >
+            <CheckSquare size={14} /> Bulk
+          </button>
         </div>
       </div>
 
@@ -59,6 +79,7 @@ export default function ListPage() {
           <table className="list-table">
             <thead>
               <tr>
+                {bulkMode && <th style={{ width: 28 }}></th>}
                 <th style={{ width: 28 }}></th>
                 <th style={{ width: 80 }}>ID</th>
                 <SortHeader field="priority">Priority</SortHeader>
@@ -74,7 +95,16 @@ export default function ListPage() {
                 const typeColor = TYPE_COLORS[t.type] || '#0078d4';
                 const labels = Array.isArray(t.labels) ? t.labels : [];
                 return (
-                  <tr key={t.id} onClick={() => setSelectedTask(t)} className="list-row">
+                  <tr key={t.id} onClick={() => !bulkMode && setSelectedTask(t)} className="list-row">
+                    {bulkMode && (
+                      <td onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(t.id)}
+                          onChange={() => toggleSelect(t.id)}
+                        />
+                      </td>
+                    )}
                     <td>
                       <div className="list-type-icon" style={{ background: typeColor }}>
                         <svg width="10" height="10" viewBox="0 0 16 16" fill="white">
@@ -100,7 +130,7 @@ export default function ListPage() {
                 );
               })}
               {sorted.length === 0 && (
-                <tr><td colSpan={8} className="empty-row">No work items found.</td></tr>
+                <tr><td colSpan={bulkMode ? 9 : 8} className="empty-row">No work items found.</td></tr>
               )}
             </tbody>
           </table>
@@ -116,6 +146,14 @@ export default function ListPage() {
       </div>
 
       {showCreate && <CreateTaskModal onClose={() => setShowCreate(false)} onCreated={loadTasks} />}
+
+      {bulkMode && (
+        <BulkActionBar
+          selectedIds={[...selectedIds]}
+          onClear={() => setSelectedIds(new Set())}
+          onDone={() => { setSelectedIds(new Set()); setBulkMode(false); loadTasks(); }}
+        />
+      )}
     </>
   );
 }

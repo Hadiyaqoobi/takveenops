@@ -1,0 +1,144 @@
+.myday-loading {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.myday-greeting {
+  font-size: 18px;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+
+.myday-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+.myday-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 16px;
+}
+
+.myday-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-heading);
+  margin-bottom: 12px;
+}
+
+.myday-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.myday-task-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+.myday-task-item:hover {
+  background: var(--bg-hover);
+}
+
+.myday-task-id {
+  font-weight: 600;
+  color: var(--text-link);
+  min-width: 60px;
+}
+
+.myday-task-title {
+  flex: 1;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.myday-status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 3px;
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+}
+
+.myday-status-in-progress { background: #cce5ff; color: #004085; }
+.myday-status-review { background: #fff3cd; color: #856404; }
+.myday-status-blocked { background: #f8d7da; color: #721c24; }
+
+.myday-due {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--p1-color);
+  min-width: 80px;
+}
+
+.myday-empty {
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 8px 0;
+}
+
+.myday-notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.myday-notif-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.myday-notif-item:last-child {
+  border-bottom: none;
+}
+
+.myday-notif-msg {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.myday-notif-time {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.myday-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.myday-action-btn {
+  display: block;
+  padding: 10px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-link);
+  background: var(--bg-page);
+  border-radius: 3px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.myday-action-btn:hover {
+  background: var(--bg-hover);
+}

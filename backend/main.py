@@ -1,12 +1,18 @@
 """TakvenOps — FastAPI backend entry point."""
 
 import os
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.staticfiles import StaticFiles
 
 from .database import init_db
-from .routes import tasks, sprints, team, scanner, standup, analytics, auth, profile
+from .routes import tasks, sprints, team, scanner, standup, analytics, auth, profile, comments, notifications, github
+from .routes import templates, time_tracking, myday, recurring, webhooks, websocket, attachments
+from .routes import projects, ai_agents, invitations
 from .services.task_sync import sync_from_filesystem
+
+UPLOAD_DIR = Path(os.environ.get("UPLOAD_DIR", str(Path(__file__).parent / "uploads")))
 
 app = FastAPI(title="TakvenOps API", version="1.0.0")
 
@@ -33,11 +39,29 @@ app.include_router(standup.router)
 app.include_router(analytics.router)
 app.include_router(auth.router)
 app.include_router(profile.router)
+app.include_router(comments.router)
+app.include_router(notifications.router)
+app.include_router(github.router)
+app.include_router(templates.router)
+app.include_router(time_tracking.router)
+app.include_router(myday.router)
+app.include_router(recurring.router)
+app.include_router(webhooks.router)
+app.include_router(websocket.router)
+app.include_router(attachments.router)
+app.include_router(projects.router)
+app.include_router(ai_agents.router)
+app.include_router(invitations.router)
 
 
 @app.on_event("startup")
 def startup():
     init_db()
+    # Create upload directories
+    (UPLOAD_DIR / "tasks").mkdir(parents=True, exist_ok=True)
+    (UPLOAD_DIR / "avatars").mkdir(parents=True, exist_ok=True)
+    # Serve uploaded files at /api/uploads/
+    app.mount("/api/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 
 @app.get("/api/health")

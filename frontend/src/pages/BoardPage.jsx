@@ -1,10 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, useDroppable, rectIntersection } from '@dnd-kit/core';
-import { Plus, Filter } from 'lucide-react';
+import { Plus, Filter, Wand2, CheckSquare } from 'lucide-react';
 import TaskCard from '../components/TaskCard';
 import TaskDetail from '../components/TaskDetail';
 import CreateTaskModal from '../components/CreateTaskModal';
-import { getTasks, moveTask } from '../api';
+import QuickAddBar from '../components/QuickAddBar';
+import BulkActionBar from '../components/BulkActionBar';
+import { getTasks, moveTask, autoAssignTasks } from '../api';
+import { useProject } from '../contexts/ProjectContext';
+import useWebSocket from '../hooks/useWebSocket';
 import './BoardPage.css';
 
 const COLUMNS = [
@@ -25,7 +29,7 @@ const TYPE_COLORS = {
   ops: '#8a8886',
 };
 
-function DroppableColumn({ id, label, tasks, onTaskClick }) {
+function DroppableColumn({ id, label, tasks, onTaskClick, bulkMode, selectedIds, onSelect }) {
   const { setNodeRef, isOver } = useDroppable({ id });
 
   return (
@@ -36,7 +40,14 @@ function DroppableColumn({ id, label, tasks, onTaskClick }) {
       </div>
       <div className="board-col-body">
         {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} onClick={onTaskClick} />
+          <TaskCard
+            key={task.id}
+            task={task}
+            onClick={onTaskClick}
+            bulkMode={bulkMode}
+            selected={selectedIds?.has(task.id)}
+            onSelect={onSelect}
+          />
         ))}
         {tasks.length === 0 && (
           <div className="board-col-empty">Drop items here</div>
@@ -47,12 +58,16 @@ function DroppableColumn({ id, label, tasks, onTaskClick }) {
 }
 
 export default function BoardPage() {
+  const { currentProject } = useProject();
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
   const [activeId, setActiveId] = useState(null);
   const [filterType, setFilterType] = useState('');
   const [filterAssignee, setFilterAssignee] = useState('');
+  const [bulkMode, setBulkMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [autoAssigning, setAutoAssigning] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
@@ -60,13 +75,40 @@ export default function BoardPage() {
 
   const loadTasks = useCallback(async () => {
     try {
-      setTasks(await getTasks());
+      setTasks(await getTasks({ project_id: currentProject }));
     } catch (e) {
       console.error('Failed to load tasks:', e);
     }
-  }, []);
+  }, [currentProject]);
 
   useEffect(() => { loadTasks(); }, [loadTasks]);
+
+  // WebSocket real-time updates
+  useWebSocket(useCallback((msg) => {
+    if (['task_created', 'task_moved', 'task_deleted', 'task_assigned'].includes(msg.event)) {
+      loadTasks();
+    }
+  }, [loadTasks]));
+
+  const handleAutoAssign = async () => {
+    setAutoAssigning(true);
+    try {
+      await autoAssignTasks();
+      loadTasks();
+    } catch (e) {
+      console.error('Auto-assign failed:', e);
+    }
+    setAutoAssigning(false);
+  };
+
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   // Filter
   let filtered = tasks;
@@ -132,11 +174,26 @@ export default function BoardPage() {
           <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
             <Plus size={13} /> New Work Item
           </button>
-          <button className="btn btn-ghost" title="Filter">
-            <Filter size={14} />
+          <button
+            className="btn btn-ghost"
+            onClick={handleAutoAssign}
+            disabled={autoAssigning}
+            title="Auto-assign unassigned tasks"
+          >
+            <Wand2 size={14} /> {autoAssigning ? 'Assigning...' : 'Auto-Assign'}
+          </button>
+          <button
+            className={`btn btn-ghost ${bulkMode ? 'btn-active' : ''}`}
+            onClick={() => { setBulkMode(!bulkMode); setSelectedIds(new Set()); }}
+            title="Bulk select"
+          >
+            <CheckSquare size={14} /> Bulk
           </button>
         </div>
       </div>
+
+      {/* Quick Add — Natural Language */}
+      <QuickAddBar onCreated={loadTasks} />
 
       {/* Filter toolbar */}
       <div className="toolbar">
@@ -177,6 +234,9 @@ export default function BoardPage() {
                 label={col.label}
                 tasks={tasksByStatus[col.id] || []}
                 onTaskClick={setSelectedTask}
+                bulkMode={bulkMode}
+                selectedIds={selectedIds}
+                onSelect={toggleSelect}
               />
             ))}
           </div>
@@ -215,6 +275,14 @@ export default function BoardPage() {
 
       {showCreate && (
         <CreateTaskModal onClose={() => setShowCreate(false)} onCreated={loadTasks} />
+      )}
+
+      {bulkMode && (
+        <BulkActionBar
+          selectedIds={[...selectedIds]}
+          onClear={() => setSelectedIds(new Set())}
+          onDone={() => { setSelectedIds(new Set()); setBulkMode(false); loadTasks(); }}
+        />
       )}
     </>
   );

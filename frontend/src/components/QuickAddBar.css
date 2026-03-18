@@ -1,0 +1,92 @@
+.quick-add-bar {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.quick-add-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+.quick-add-icon {
+  color: var(--text-link);
+  flex-shrink: 0;
+}
+
+.quick-add-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--text-primary);
+  outline: none;
+  padding: 4px 0;
+}
+.quick-add-input::placeholder {
+  color: var(--text-muted);
+}
+
+.quick-add-clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 2px;
+  display: flex;
+}
+.quick-add-clear:hover {
+  color: var(--text-primary);
+}
+
+.quick-add-parse-btn {
+  font-size: 12px !important;
+  padding: 4px 10px !important;
+}
+
+.quick-add-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-hover);
+  gap: 12px;
+}
+
+.quick-add-preview-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  flex: 1;
+}
+
+.quick-add-field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.quick-add-label {
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+.quick-add-type-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.quick-add-create-btn {
+  flex-shrink: 0;
+}

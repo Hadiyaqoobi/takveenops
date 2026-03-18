@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { User, Save, CheckCircle, Clock, AlertCircle, Layers } from 'lucide-react';
+import { User, Save, CheckCircle, Clock, AlertCircle, Layers, Camera, Mail, Bell } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { getProfileDashboard, updateProfile } from '../api';
+import { getProfileDashboard, updateProfile, uploadAvatar, UPLOADS_BASE, getEmailPreferences, updateEmailPreferences } from '../api';
 import './ProfilePage.css';
 
 const STATUS_LABELS = {
@@ -20,11 +20,17 @@ export default function ProfilePage() {
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ display_name: '', email: '' });
   const [saving, setSaving] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || null);
+  const [emailPrefs, setEmailPrefs] = useState(null);
+  const [emailPrefsSaving, setEmailPrefsSaving] = useState(false);
 
   useEffect(() => {
     getProfileDashboard()
       .then(setDashboard)
       .catch((e) => console.error('Failed to load dashboard:', e));
+    getEmailPreferences()
+      .then(setEmailPrefs)
+      .catch((e) => console.error('Failed to load email prefs:', e));
   }, []);
 
   const startEdit = () => {
@@ -45,6 +51,17 @@ export default function ProfilePage() {
     setSaving(false);
   };
 
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const res = await uploadAvatar(file);
+      setAvatarUrl(res.avatar_url);
+    } catch (err) {
+      console.error('Avatar upload failed:', err);
+    }
+  };
+
   const stats = dashboard?.stats || {};
   const tasks = dashboard?.assigned_tasks || [];
   const activity = dashboard?.recent_activity || [];
@@ -57,8 +74,16 @@ export default function ProfilePage() {
 
       {/* Profile header */}
       <div className="profile-header-card">
-        <div className="profile-avatar-large">
-          {user?.display_name?.slice(0, 2).toUpperCase() || '??'}
+        <div className="profile-avatar-large profile-avatar-uploadable">
+          {avatarUrl ? (
+            <img src={`${UPLOADS_BASE}${avatarUrl}`} alt="avatar" className="profile-avatar-img" />
+          ) : (
+            user?.display_name?.slice(0, 2).toUpperCase() || '??'
+          )}
+          <label className="avatar-upload-overlay">
+            <Camera size={16} />
+            <input type="file" accept="image/*" hidden onChange={handleAvatarUpload} />
+          </label>
         </div>
         <div className="profile-info">
           {editing ? (
@@ -168,6 +193,56 @@ export default function ProfilePage() {
               </div>
             ))}
           </div>
+        )}
+      </div>
+
+      {/* Email Notification Preferences */}
+      <div className="profile-section">
+        <h3><Mail size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />Email Notifications</h3>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>
+          Choose which events send you email notifications. Make sure your email is set above.
+        </p>
+        {emailPrefs ? (
+          <div className="email-prefs-grid">
+            {[
+              { key: 'on_task_assigned', label: 'Task assigned to me', desc: 'When someone assigns a task to you' },
+              { key: 'on_task_mentioned', label: 'Mentioned in a task', desc: 'When someone @mentions you in a comment' },
+              { key: 'on_task_commented', label: 'Comment on my task', desc: 'When someone comments on a task assigned to you' },
+              { key: 'on_status_changed', label: 'Task status changed', desc: 'When a task you own changes status' },
+              { key: 'on_deadline_reminder', label: 'Deadline reminders', desc: 'When a task deadline is approaching' },
+              { key: 'on_escalation', label: 'Priority escalation', desc: 'When a task priority is escalated' },
+            ].map(({ key, label, desc }) => (
+              <label key={key} className="email-pref-row">
+                <input
+                  type="checkbox"
+                  checked={emailPrefs[key] || false}
+                  onChange={(e) => setEmailPrefs({ ...emailPrefs, [key]: e.target.checked })}
+                />
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-heading)' }}>{label}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{desc}</div>
+                </div>
+              </label>
+            ))}
+            <button
+              className="btn btn-primary"
+              disabled={emailPrefsSaving}
+              style={{ marginTop: 8, alignSelf: 'flex-start' }}
+              onClick={async () => {
+                setEmailPrefsSaving(true);
+                try {
+                  await updateEmailPreferences(emailPrefs);
+                } catch (e) {
+                  console.error('Failed to save prefs:', e);
+                }
+                setEmailPrefsSaving(false);
+              }}
+            >
+              <Save size={13} /> {emailPrefsSaving ? 'Saving...' : 'Save Preferences'}
+            </button>
+          </div>
+        ) : (
+          <div className="profile-empty">Loading preferences...</div>
         )}
       </div>
     </>
