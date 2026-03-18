@@ -2,7 +2,82 @@
 
 TakvenOps is the project management system for this codebase. All task tracking, assignments, and status updates happen through TakvenOps.
 
-## Task Management CLI
+## Production API Access
+
+The live TakvenOps platform is deployed at:
+- **API**: `https://takvenops-api.onrender.com/api`
+- **Frontend**: Vercel (TakvenOps web UI)
+
+### Authentication
+
+To interact with the production API, first login to get a token:
+
+```bash
+# Login as Antigravity agent
+TOKEN=$(curl -s -X POST "https://takvenops-api.onrender.com/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"username":"antigravity","password":"AGbot2026ops"}' | python -c "import sys,json; print(json.load(sys.stdin)['token'])")
+```
+
+Then use the token in all subsequent requests:
+```bash
+curl -s -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" ...
+```
+
+### API Quick Reference (Production)
+
+```bash
+# List all tasks
+curl -s -H "Authorization: Bearer $TOKEN" "https://takvenops-api.onrender.com/api/tasks"
+
+# Create a task
+curl -s -X POST "https://takvenops-api.onrender.com/api/tasks" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"title":"Task title","type":"feature","priority":"P2","assignee":"username","status":"backlog"}'
+
+# Assign a task
+curl -s -X POST "https://takvenops-api.onrender.com/api/tasks/TASK_ID/assign" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"assignee":"username"}'
+
+# Move task status
+curl -s -X POST "https://takvenops-api.onrender.com/api/tasks/TASK_ID/move" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"status":"in-progress"}'
+
+# Update a task
+curl -s -X PUT "https://takvenops-api.onrender.com/api/tasks/TASK_ID" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"priority":"P1","due_date":"2026-04-01"}'
+
+# Add a comment
+curl -s -X POST "https://takvenops-api.onrender.com/api/tasks/TASK_ID/comments" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"body":"Comment text here"}'
+
+# List team members
+curl -s -H "Authorization: Bearer $TOKEN" "https://takvenops-api.onrender.com/api/team"
+
+# Get sprints
+curl -s -H "Authorization: Bearer $TOKEN" "https://takvenops-api.onrender.com/api/sprints"
+
+# Create a sprint
+curl -s -X POST "https://takvenops-api.onrender.com/api/sprints" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"name":"Sprint 1","goal":"MVP delivery","start_date":"2026-03-18","end_date":"2026-04-01"}'
+
+# Send email to team member
+curl -s -X POST "https://takvenops-api.onrender.com/api/send-email" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"to":"email@example.com","subject":"Subject","body_html":"<p>HTML body</p>"}'
+
+# Invite a new user
+curl -s -X POST "https://takvenops-api.onrender.com/api/invitations" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","role":"member","project_id":"default"}'
+```
+
+## Task Management CLI (Local Dev)
 
 Use the CLI at `ops.py` (in the project root) to manage tasks. The TakvenOps backend must be running on port 8001.
 
@@ -85,8 +160,8 @@ When asked to create tasks:
 
 ## Architecture
 
-- **Backend**: FastAPI + SQLite at `backend/` (runs on port 8001)
-- **Frontend**: React + Vite at `frontend/` (runs on port 5173)
+- **Backend**: FastAPI + SQLite/PostgreSQL at `backend/` (port 8001 local, Render production)
+- **Frontend**: React + Vite at `frontend/` (port 5173 local, Vercel production)
 - **CLI**: `ops.py` in project root (calls the API)
 - **Web UI**: http://localhost:5173 (Kanban board, work items, analytics)
 
@@ -101,6 +176,10 @@ cd C:\Users\hyaqo\Desktop\TakvenOps\frontend && npx vite --port 5173
 
 ## Team Members
 
-Team members are managed in Settings. Default AI agents:
-- `antigravity` — Antigravity (Claude Code)
-- `claude-code` — Claude Code
+| Name | Username | Role | Type |
+|------|----------|------|------|
+| Hadi Yaqoobi | admin / hadiyaqoobi | Founder / Admin | Human |
+| Rahima Paiman | rahimapaiman | Head of Operations & Partnerships / Admin | Human |
+| Sahar Nikzad | saharnikzad | AI Data Quality Analyst / Intern | Human |
+| Antigravity | antigravity | AI Agent | AI |
+| Claude Code | claude-code | AI Agent | AI |
