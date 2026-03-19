@@ -139,42 +139,40 @@ def register(body: RegisterRequest):
 
 @router.post("/login")
 def login(body: LoginRequest):
-    try:
-        conn = get_db()
-        user = conn.execute("SELECT * FROM users WHERE username = ?", (body.username,)).fetchone()
-        conn.close()
+    conn = get_db()
+    row = conn.execute("SELECT * FROM users WHERE username = ?", (body.username,)).fetchone()
+    conn.close()
 
-        if not user:
-            raise HTTPException(401, "Invalid username or password")
+    if not row:
+        raise HTTPException(401, "Invalid username or password")
 
-        if not verify_password(body.password, user["password_hash"], user.get("salt", "")):
-            raise HTTPException(401, "Invalid username or password")
+    # Convert to dict so .get() works on both SQLite and PG
+    user = dict(row)
 
-        # Transparently upgrade legacy SHA-256 hash to bcrypt
-        if not (user["password_hash"].startswith("$2b$") or user["password_hash"].startswith("$2a$")):
-            new_hash = hash_password(body.password)
-            conn2 = get_db()
-            conn2.execute("UPDATE users SET password_hash = ?, salt = '' WHERE id = ?", (new_hash, user["id"]))
-            conn2.commit()
-            conn2.close()
+    if not verify_password(body.password, user["password_hash"], user.get("salt", "")):
+        raise HTTPException(401, "Invalid username or password")
 
-        session = create_session(user["id"])
-        return {
-            "token": session["token"],
-            "refresh_token": session["refresh_token"],
-            "user": {
-                "id": user["id"],
-                "username": user["username"],
-                "display_name": user["display_name"],
-                "email": user["email"],
-                "role": user["role"],
-                "avatar_url": user.get("avatar_url"),
-            },
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(500, f"Login error: {type(e).__name__}: {str(e)}")
+    # Transparently upgrade legacy SHA-256 hash to bcrypt
+    if not (user["password_hash"].startswith("$2b$") or user["password_hash"].startswith("$2a$")):
+        new_hash = hash_password(body.password)
+        conn2 = get_db()
+        conn2.execute("UPDATE users SET password_hash = ?, salt = '' WHERE id = ?", (new_hash, user["id"]))
+        conn2.commit()
+        conn2.close()
+
+    session = create_session(user["id"])
+    return {
+        "token": session["token"],
+        "refresh_token": session["refresh_token"],
+        "user": {
+            "id": user["id"],
+            "username": user["username"],
+            "display_name": user["display_name"],
+            "email": user["email"],
+            "role": user["role"],
+            "avatar_url": user.get("avatar_url"),
+        },
+    }
 
 
 @router.post("/logout")
