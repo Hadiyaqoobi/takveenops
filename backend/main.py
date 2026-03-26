@@ -19,8 +19,13 @@ app = FastAPI(title="TakvenOps API", version="1.0.0")
 
 # CORS: allow configured frontend URL + localhost for dev
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "")
-cors_origins = ["http://localhost:5173", "http://localhost:3000"]
-if FRONTEND_URL:
+cors_origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://takveenops.vercel.app",
+    "https://takvenops.vercel.app",
+]
+if FRONTEND_URL and FRONTEND_URL not in cors_origins:
     cors_origins.append(FRONTEND_URL)
 
 app.add_middleware(
